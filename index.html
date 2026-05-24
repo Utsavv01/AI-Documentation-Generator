@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>AI Documentation Generator</title>
+
+    <style>
+        body {
+
+            font-family: Arial;
+            background: #0f172a;
+            color: white;
+
+            max-width: 1100px;
+            margin: auto;
+            padding: 30px;
+        }
+
+        h1 {
+
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        textarea {
+
+            width: 100%;
+            height: 220px;
+
+            padding: 15px;
+
+            border-radius: 10px;
+            border: none;
+
+            font-size: 15px;
+        }
+
+        input {
+
+            width: 100%;
+            padding: 12px;
+
+            border-radius: 10px;
+            border: none;
+
+            margin-bottom: 15px;
+        }
+
+        button {
+
+            padding: 12px 20px;
+
+            border: none;
+            border-radius: 10px;
+
+            cursor: pointer;
+
+            font-size: 15px;
+            margin-top: 10px;
+        }
+
+        .container {
+
+            background: #1e293b;
+
+            padding: 25px;
+
+            border-radius: 15px;
+        }
+
+        #output {
+
+            margin-top: 25px;
+
+            background: #111827;
+
+            padding: 25px;
+
+            border-radius: 10px;
+
+            line-height: 1.7;
+
+            overflow-x: auto;
+        }
+
+        #output h1,
+        #output h2,
+        #output h3 {
+
+            color: #60a5fa;
+        }
+
+        #output pre {
+
+            background: #1e293b;
+
+            padding: 15px;
+
+            border-radius: 8px;
+
+            overflow-x: auto;
+        }
+
+        #output code {
+
+            color: #facc15;
+        }
+
+        .loading {
+
+            margin-top: 15px;
+        }
+    </style>
+
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+</head>
+
+<body>
+
+    <h1>🚀 AI Technical Documentation Generator</h1>
+
+    <div class="container">
+
+        <h2>Analyze GitHub Repository</h2>
+
+        <input type="text" id="repoUrl" placeholder="Paste GitHub repository URL...">
+
+        <button onclick="analyzeRepo()">
+            Analyze Repository
+        </button>
+
+        <hr><br>
+
+        <h2>Upload or Paste Code</h2>
+
+        <input type="file" id="fileInput">
+
+        <br><br>
+
+        <textarea id="codeInput" placeholder="Paste your code here..."></textarea>
+
+        <br>
+
+        <button onclick="generateDocs()">
+            Generate Documentation
+        </button>
+
+        <div class="loading" id="loading"></div>
+
+        
+
+        <div id="output"></div>
+
+    </div>
+
+    <script>
+
+        document
+            .getElementById("fileInput")
+            .addEventListener("change", function (event) {
+
+                const file = event.target.files[0];
+
+                if (!file) return;
+
+                const reader = new FileReader();
+
+                reader.onload = function (e) {
+
+                    document
+                        .getElementById("codeInput")
+                        .value = e.target.result;
+                };
+
+                reader.readAsText(file);
+            });
+
+        async function generateDocs() {
+
+            const code =
+                document.getElementById("codeInput").value;
+
+            const output =
+                document.getElementById("output");
+
+            const loading =
+                document.getElementById("loading");
+
+            loading.innerHTML = "⏳ Generating...";
+
+            output.innerHTML = "";
+
+            try {
+
+                const response = await fetch(
+                    "http://127.0.0.1:8000/generate-docs",
+                    {
+                        method: "POST",
+
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+
+                        body: JSON.stringify({
+                            code: code
+                        })
+                    }
+                );
+
+                const data = await response.json();
+
+                output.innerHTML =
+                    marked.parse(
+                        data.documentation ||
+                        JSON.stringify(data)
+                    );
+
+
+            } catch (error) {
+
+                output.innerHTML =
+                    "❌ Error connecting to backend.";
+            }
+
+            loading.innerHTML = "";
+        }
+
+        async function analyzeRepo() {
+
+            const repoUrl =
+                document.getElementById("repoUrl").value;
+
+            const output =
+                document.getElementById("output");
+
+            const loading =
+                document.getElementById("loading");
+
+            loading.innerHTML =
+                "⏳ Analyzing GitHub repository...";
+
+            output.innerHTML = "";
+
+            try {
+
+                const response = await fetch(
+                    "http://127.0.0.1:8000/analyze-repo",
+                    {
+                        method: "POST",
+
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+
+                        body: JSON.stringify({
+                            repo_url: repoUrl
+                        })
+                    }
+                );
+
+                const data = await response.json();
+
+                output.innerHTML =
+                    marked.parse(
+                        data.documentation ||
+                        JSON.stringify(data)
+                    );
+
+            } catch (error) {
+
+                output.innerHTML =
+                    "❌ Error analyzing repository.";
+            }
+
+            loading.innerHTML = "";
+        }
+
+    </script>
+
+</body>
+
+</html>
