@@ -151,12 +151,6 @@ POST /analyze-repo
 
 ---
 
-### Summarize Pull Request
-
-```http
-POST /summarize-pr
-```
-
 #### Request
 
 ```json
@@ -212,9 +206,6 @@ Fork the repository and submit a pull request.
 
 ---
 
-## 📄 License
-
-This project is licensed under the MIT License.
 
 ---
 
